@@ -1,0 +1,276 @@
+{
+  "name": "Task Tracker Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "Test title",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "n8n-test-sheet"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        96
+      ],
+      "id": "39ce8f97-d58f-4c13-953c-05a24dd71075",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1xNr62v2XzUkQF8NA0eaXTe9Wg_rSf-FS55wpF81scf0",
+          "mode": "list",
+          "cachedResultName": "Test title",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xNr62v2XzUkQF8NA0eaXTe9Wg_rSf-FS55wpF81scf0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 141728186,
+          "mode": "list",
+          "cachedResultName": "n8n-test-sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xNr62v2XzUkQF8NA0eaXTe9Wg_rSf-FS55wpF81scf0/edit#gid=141728186"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Id"
+          ],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Task",
+              "displayName": "Task",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        0
+      ],
+      "id": "05fe646f-549f-4395-ae58-e430db946462",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const text = $('Webhook').item.json.body[0].message  || \"\";\n\n// Normalize text (VERY IMPORTANT)\nconst cleanText = text\n  .replace(/\\r?\\n/g, \"\\n\")   // normalize line breaks\n  .split(\"\\n\")\n  .map(line => line.trim()) // remove leading/trailing spaces\n  .join(\"\\n\");\n\nreturn {\n  json: {\n    Id: cleanText.match(/ID:\\s*(\\d+)/i)?.[1] || \"\",\n    Task: cleanText.match(/Task:\\s*(.+)/i)?.[1] || \"\",\n    Status: cleanText.match(/Status:\\s*(.+)/i)?.[1] || \"\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "86064fad-485d-46b3-b156-54ef7758c057",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "path": "updatetask",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        0
+      ],
+      "id": "42df0e28-293d-4f9c-9d1e-0c9875b1e7cd",
+      "name": "Webhook",
+      "webhookId": "373aaa5c-33a3-4ff8-bd96-62905c9233ca"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb186db4-0f52-4401-9807-0ce7aba4a3f1",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        0
+      ],
+      "id": "dab8b520-1fcd-4f1f-8835-9477c95b34f4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "Test title",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b7e5986c-559a-4333-a57b-feca0c60947d",
+      "name": "Search_File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VVMyfLv8htkhlaXN",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search_File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Search_File": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e827025e-59ea-4bde-be9f-244879dcf5e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ff4fd07653b66234de2f8b92caedc6d01c5f049a2f07c037a8226ecbe73e49a4"
+  },
+  "id": "VTHRfbQrUpcanpsP",
+  "tags": []
+}
