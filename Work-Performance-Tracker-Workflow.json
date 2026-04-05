@@ -1,0 +1,499 @@
+{
+  "name": "Task Tracker Workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "work_performance_tracker",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Task Master"
+            },
+            {
+              "title": "Daily Log"
+            },
+            {
+              "title": "Dashboard"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        96
+      ],
+      "id": "3bb9a765-102b-4768-a94e-32353998a672",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d05e6f34-244d-49dc-bfe8-4ff7c5276cf7",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "c46a0849-9972-44fa-847f-b28ba1242bbf",
+      "name": "Webhook",
+      "webhookId": "d05e6f34-244d-49dc-bfe8-4ff7c5276cf7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb186db4-0f52-4401-9807-0ce7aba4a3f1",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        0
+      ],
+      "id": "927b435f-930e-4d6c-9509-44f6b696d6e1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "work_performance_tracker",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e0235a5b-ce3c-4d26-a5ba-639f33f593e9",
+      "name": "Search_File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VVMyfLv8htkhlaXN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0",
+          "mode": "list",
+          "cachedResultName": "work_performance_tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2046614965,
+          "mode": "list",
+          "cachedResultName": "Task Master",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit#gid=2046614965"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Task ID": "={{ $('Webhook').item.json.body.Task.TaskId }}",
+            "Task Title": "={{ $('Webhook').item.json.body.Task.TaskTitle }}",
+            "Task Type": "={{ $('Webhook').item.json.body.Task.TaskType }}",
+            "Status": "={{ $('Webhook').item.json.body.Task.Status }}",
+            "Start Date": "={{ $('Webhook').item.json.body.Task.StartDate }}",
+            "Priority": "={{ $('Webhook').item.json.body.Task.Priority }}",
+            "End Date": "={{ $('Webhook').item.json.body.Task.EndDate }}",
+            "Estimated Hours": "={{ $('Webhook').item.json.body.Task.EstimatedHours }}",
+            "Dependencies": "={{ $('Webhook').item.json.body.Task.Dependencies }}",
+            "Remarks": "={{ $('Webhook').item.json.body.Task.Remarks }}"
+          },
+          "matchingColumns": [
+            "Task ID"
+          ],
+          "schema": [
+            {
+              "id": "Task ID",
+              "displayName": "Task ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Task Title",
+              "displayName": "Task Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Task Type",
+              "displayName": "Task Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start Date",
+              "displayName": "Start Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Date",
+              "displayName": "End Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estimated Hours",
+              "displayName": "Estimated Hours",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actual Hours",
+              "displayName": "Actual Hours",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dependencies",
+              "displayName": "Dependencies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Remarks",
+              "displayName": "Remarks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        0
+      ],
+      "id": "8f8de5f8-a9fd-41aa-b192-fff068d4e089",
+      "name": "Update in Task master",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0",
+          "mode": "list",
+          "cachedResultName": "work_performance_tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 428613708,
+          "mode": "list",
+          "cachedResultName": "Daily Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit#gid=428613708"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Task ID": "={{ $('Webhook').item.json.body.Task.TaskId }}",
+            "Task Type": "={{ $('Webhook').item.json.body.Task.TaskType }}",
+            "Remarks": "={{ $('Webhook').item.json.body.Task.Remarks }}",
+            "Date": "={{ $('Webhook').item.json.body.Log.Date }}",
+            "Work Description": "={{ $('Webhook').item.json.body.Log.WorkDescription }}",
+            "Hours Spent": "={{ $('Webhook').item.json.body.Log.HoursSpent }}",
+            "Status Update": "={{ $('Webhook').item.json.body.Log.StatusUpdate }}"
+          },
+          "matchingColumns": [
+            "Task ID"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Task ID",
+              "displayName": "Task ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Task Type",
+              "displayName": "Task Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Work Description",
+              "displayName": "Work Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hours Spent",
+              "displayName": "Hours Spent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status Update",
+              "displayName": "Status Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Remarks",
+              "displayName": "Remarks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Week",
+              "displayName": "Week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Month",
+              "displayName": "Month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Year",
+              "displayName": "Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "e832a9b1-9bc5-4828-bd26-41166b5ce8f8",
+      "name": "Insert in Daily Log",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Update in Task master",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search_File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search_File": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update in Task master",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update in Task master": {
+      "main": [
+        [
+          {
+            "node": "Insert in Daily Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d9b124f9-d5ab-4973-8597-557b85bdba11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ff4fd07653b66234de2f8b92caedc6d01c5f049a2f07c037a8226ecbe73e49a4"
+  },
+  "id": "aQRoaqfgCiCIE7UO",
+  "tags": []
+}
