@@ -96,7 +96,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        224,
+        208,
         0
       ],
       "id": "e0235a5b-ce3c-4d26-a5ba-639f33f593e9",
@@ -129,13 +129,12 @@
           "mappingMode": "defineBelow",
           "value": {
             "Task ID": "={{ $('Webhook').item.json.body.Task.TaskId }}",
-            "Task Title": "={{ $('Webhook').item.json.body.Task.TaskTitle }}",
-            "Task Type": "={{ $('Webhook').item.json.body.Task.TaskType }}",
-            "Status": "={{ $('Webhook').item.json.body.Task.Status }}",
-            "Start Date": "={{ $('Webhook').item.json.body.Task.StartDate }}",
-            "Priority": "={{ $('Webhook').item.json.body.Task.Priority }}",
+            "Task Title": "={{ $('Webhook').item.json.body?.Task?.TaskTitle ?? $json['Task Title'] }}",
+            "Task Type": "={{ $('Webhook').item.json.body?.Task?.TaskType ?? $json['Task Type'] }}",
+            "Status": "={{ $('Webhook').item.json.body.Task.Status ? $('Webhook').item.json.body.Task.Status : undefined }}",
+            "Priority": "={{ $('Webhook').item.json.body?.Task?.Priority ?? $json.Priority ?? 'Normal' }}",
             "End Date": "={{ $('Webhook').item.json.body.Task.EndDate }}",
-            "Estimated Hours": "={{ $('Webhook').item.json.body.Task.EstimatedHours }}",
+            "Estimated Hours": "={{ $json['Estimated Hours'] ?? $('Webhook').item.json.body?.Task?.EstimatedHours }}",
             "Dependencies": "={{ $('Webhook').item.json.body.Task.Dependencies }}",
             "Remarks": "={{ $('Webhook').item.json.body.Task.Remarks }}"
           },
@@ -196,7 +195,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
               "id": "End Date",
@@ -223,7 +223,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
               "id": "Dependencies",
@@ -247,12 +248,14 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {
+          "useAppend": false
+        }
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        864,
+        1040,
         0
       ],
       "id": "8f8de5f8-a9fd-41aa-b192-fff068d4e089",
@@ -405,7 +408,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1056,
+        1232,
         0
       ],
       "id": "e832a9b1-9bc5-4828-bd26-41166b5ce8f8",
@@ -416,6 +419,51 @@
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0",
+          "mode": "list",
+          "cachedResultName": "work_performance_tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2046614965,
+          "mode": "list",
+          "cachedResultName": "Task Master",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fRORNpD40QpHPkKR8fhZwdMK2mEvn8xZoyCNm8a1Ay0/edit#gid=2046614965"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Task ID",
+              "lookupValue": "={{ $('Webhook').item.json.body.Task.TaskId }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        0
+      ],
+      "id": "ddd1a25b-2cac-4062-b667-fc75d2501eb3",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PRYtkzolu9j0Iy6C",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "pinData": {},
@@ -424,7 +472,7 @@
       "main": [
         [
           {
-            "node": "Update in Task master",
+            "node": "Get row(s) in sheet",
             "type": "main",
             "index": 0
           }
@@ -457,7 +505,7 @@
       "main": [
         [
           {
-            "node": "Update in Task master",
+            "node": "Get row(s) in sheet",
             "type": "main",
             "index": 0
           }
@@ -481,15 +529,27 @@
           }
         ]
       ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Update in Task master",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "d9b124f9-d5ab-4973-8597-557b85bdba11",
+  "versionId": "0dde1cd7-8e38-458a-8f20-d632b35e6a15",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ff4fd07653b66234de2f8b92caedc6d01c5f049a2f07c037a8226ecbe73e49a4"
