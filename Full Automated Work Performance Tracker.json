@@ -833,10 +833,12 @@
     },
     {
       "parameters": {
-        "text": "={{ $('Get Message').item.json.Message }}",
+        "text": "={{ $('Get Message').item.json.Message + ' Date : ' + $now.setZone('Asia/Kolkata').toFormat('yyyy-LL-dd') }}",
         "schemaType": "fromJson",
-        "jsonSchemaExample": "[\n  { \"Task\": { \"TaskId\": \"T007\", \"TaskTitle\": \"Email Notification System\", \"TaskType\": \"Feature\", \"Status\": \"Testing\", \"Priority\": \"Medium\", \"EstimatedHours\": 30, \"StartDate\": \"2026-04-06\", \"EndDate\": \"2026-04-08\", \"Dependencies\": \"Database schema finalized\", \"Remarks\": \"Backend API developed, now under testing\" }, \"Log\": { \"Date\": \"2026-04-07\", \"WorkDescription\": \"Completed backend API and email template integration\", \"HoursSpent\": 7, \"StatusUpdate\": \"Testing\", \"Remarks\": \"QA testing ongoing, working as expected\" } }\n]",
-        "options": {}
+        "jsonSchemaExample": "[\n  { \"Task\": { \"TaskId\": \"T007\", \"TaskTitle\": \"Email Notification System\", \"TaskType\": \"Feature/Bug/Testing/Devops/Others\", \"Status\": \"Testing\", \"Priority\": \"Medium\", \"EstimatedHours\": 30, \"StartDate\": \"2026-04-06\", \"EndDate\": \"2026-04-08\", \"Dependencies\": \"Database schema finalized\", \"Remarks\": \"Backend API developed, now under testing\" }, \"Log\": { \"Date\": \"2026-04-07\", \"WorkDescription\": \"Completed backend API and email template integration\", \"HoursSpent\": 7, \"StatusUpdate\": \"Testing\", \"Remarks\": \"QA testing ongoing, working as expected\" } }\n]",
+        "options": {
+          "systemPromptTemplate": "You are a strict data extraction and normalization system.\n\nYour job is to extract and transform the input into the EXACT JSON schema.\n\n----------------------------------\nMANDATORY RULES\n----------------------------------\n1. ALWAYS return valid JSON only.\n2. NEVER skip mandatory fields.\n3. NEVER return null → use \"\" for optional missing fields.\n4. If mandatory data is missing → intelligently infer from context.\n5. Keep all text SHORT and CLEAN (no long paragraphs).\n6. DO NOT merge multiple fields.\n7. STANDARDIZE all enum values strictly.\n\n----------------------------------\nTASK RULES\n----------------------------------\n\nTaskId (MANDATORY)\n- Extract from \"Task Id\"\n\nTaskTitle (MANDATORY)\n- Extract from \"Task Description\"\n\nTaskType (MANDATORY - ENUM)\nMust be one of:\nFeature / Bug / Testing / Devops / Others\n\nInference rules:\n- \"feature\" → Feature\n- \"bug\" → Bug\n- \"testing\", \"QA\" → Testing\n- \"deployment\", \"CI/CD\", \"infra\" → Devops\n- Otherwise → Others\n\nStatus (MANDATORY - ENUM)\nAllowed values:\nYet to start / In-Progress / Dev completed / On hold / Completed / Under testing\n\nMapping rules:\n- \"testing\", \"QA\" → Under testing\n- \"done\" → Completed\n- \"in progress\" → In-Progress\n- If unclear → In-Progress\n\nPriority (MANDATORY - ENUM)\nAllowed:\nLow / Medium / High / Urgent / POC / Normal\n\nRules:\n- If not found → Normal\n- \"medium-priority\" → Medium\n\nEstimatedHours \n- Extract explicitly mentioned estimated effort if available\n- If NOT mentioned:\n    → DEFAULT = 8\n- If partial work mentioned (like hours spent), DO NOT confuse it with estimate\n\nStartDate / EndDate (OPTIONAL)\n- If not present → \"\"\n\nDependencies (OPTIONAL)\n- Must preserve ALL important context (no over-simplification)\n- Convert into structured actionable sentence\n- MUST include:\n  1. WHAT is needed\n  2. FROM WHOM (if mentioned)\n  3. WHY if available (short)\n\n- Max 12 words\n- NEVER reduce to generic words like \"Wait for data\"\n\nExamples:\n- \"Need client ID data from this person for mismatch fix\" \n- \"Await DB schema completion for integration work\"\n- \"Require API response structure from backend team\"\n\nRemarks (OPTIONAL)\n- VERY SHORT memory note (max 5–8 words)\n- Format: \"<Done> | <Now>\" (if possible)\n- Focus on progress snapshot\n- No full sentences\n- No filler words\n\nExamples:\n- \"API done | QA testing\"\n- \"Backend done | integration pending\"\n- \"Core logic done | fixing bugs\"\n\n----------------------------------\nLOG RULES\n----------------------------------\n\nDate (MANDATORY)\n- ALWAYS use current date in IST\n- FORMAT MUST BE EXACT: YYYY-MM-DD\n- DO NOT include time under any circumstances\n\nWorkDescription (MANDATORY)\n- Based on TaskTitle + progress\n- Add short meaningful detail (1 line)\n\nHoursSpent (MANDATORY)\n- Extract completed hours\n\nStatusUpdate (MANDATORY)\n- SAME as Task Status\n\nRemarks (OPTIONAL)\n- Short work note (max 5–8 words)\n- Keep simple and direct\n\nExamples:\n- \"QA ongoing\"\n- \"Working as expected\"\n- \"Fixes in progress\"\n\n----------------------------------\nINPUT\n----------------------------------\nTask Id: T007\nTask Description: Email Notification System\nStatus: Testing\nRemarks: This is a medium-priority feature task with an estimated effort of 30 hours, out of which 7 hours have been completed so far. The task depends on the database schema being finalized. The backend API and email template integration have been completed, and the system is currently under QA testing, where it is working as expected.\n\n----------------------------------\nOUTPUT FORMAT\n----------------------------------\n{\n  \"Task\": {\n    \"TaskId\": \"\",\n    \"TaskTitle\": \"\",\n    \"TaskType\": \"\",\n    \"Status\": \"\",\n    \"Priority\": \"\",\n    \"EstimatedHours\": 0,\n    \"StartDate\": \"\",\n    \"EndDate\": \"\",\n    \"Dependencies\": \"\",\n    \"Remarks\": \"\"\n  },\n  \"Log\": {\n    \"Date\": \"\",\n    \"WorkDescription\": \"\",\n    \"HoursSpent\": 0,\n    \"StatusUpdate\": \"\",\n    \"Remarks\": \"\"\n  }\n}"
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
@@ -849,7 +851,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-20b",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
@@ -1275,7 +1277,8 @@
             "Date": "={{ $('Loop Tasks').item.json.Log.Date }}",
             "Work Description": "={{ $('Loop Tasks').item.json.Log.WorkDescription }}",
             "Hours Spent": "={{ $('Loop Tasks').item.json.Log.HoursSpent }}",
-            "Status Update": "={{ $('Loop Tasks').item.json.Log.StatusUpdate }}"
+            "Status Update": "={{ $('Loop Tasks').item.json.Log.StatusUpdate }}",
+            "Raw Message": "={{ $('Get Message').item.json.Message }}"
           },
           "matchingColumns": [
             "Task ID"
@@ -1378,6 +1381,16 @@
               "type": "string",
               "canBeUsedToMatch": true,
               "removed": true
+            },
+            {
+              "id": "Raw Message",
+              "displayName": "Raw Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -1682,7 +1695,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "3a6d4647-3417-4a06-8ae1-c3ee19c2f03b",
+  "versionId": "69974378-17d3-4c18-aba3-81080979f3dc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ff4fd07653b66234de2f8b92caedc6d01c5f049a2f07c037a8226ecbe73e49a4"
